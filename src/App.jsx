@@ -57,28 +57,34 @@ export default function App() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validate()) return;
-    setLoading(true);
+  e.preventDefault();
+  if (!validate()) return;
+  setLoading(true);
 
-    try {
-      await fetch(WEBHOOK_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-    } catch (err) {
-      console.log("Webhook error:", err);
-    }
+  try {
+    await fetch(WEBHOOK_URL, {
+      method: "POST",
+      mode: "no-cors", // 🔥 FIX: required for Google Apps Script
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
+    });
+  } catch (err) {
+    console.log("Webhook error:", err);
+  }
 
-    await new Promise((r) => setTimeout(r, 400));
+  // small delay to ensure request is sent
+  await new Promise((r) => setTimeout(r, 500));
 
-    const { fullName, phone, interest, situation, startTime } = formData;
-    const message = `Hi, I just filled the form:\n\nName: ${fullName}\nPhone: ${phone}\n\nInterest: ${interest}\nSituation: ${situation}\nStart Time: ${startTime}`;
-    window.location.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
-    
-    setTimeout(() => setLoading(false), 1000);
-  };
+  const { fullName, phone, interest, situation, startTime } = formData;
+
+  const message = `Hi, I just filled the form:\n\nName: ${fullName}\nPhone: ${phone}\n\nInterest: ${interest}\nSituation: ${situation}\nStart Time: ${startTime}`;
+
+  window.location.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+
+  setTimeout(() => setLoading(false), 1000);
+};
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#f0f7ff] via-[#fafafa] to-[#f0fff4] flex flex-col items-center px-4 pt-10 pb-16 relative overflow-hidden font-sans text-slate-800">
