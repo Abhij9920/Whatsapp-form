@@ -31,7 +31,7 @@ const fields = [
 ];
 
 const WHATSAPP_NUMBER = "919029624129";
-const WEBHOOK_URL = "https://YOUR_N8N_WEBHOOK_URL";
+const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbywxCLH2MEjdElkXr-LRk-PASKypUbuwEgoNjyGycimTzcL5jbMABZ11l5jPxpVO2xu/exec";
 
 export default function App() {
   const [formData, setFormData] = useState({
