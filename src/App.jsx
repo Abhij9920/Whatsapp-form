@@ -62,19 +62,22 @@ export default function App() {
   setLoading(true);
 
   try {
-    await fetch(WEBHOOK_URL, {
+    await fetch(WEBHOOK_URL + "?t=" + Date.now(), {
       method: "POST",
-      mode: "no-cors", // 🔥 FIX: required for Google Apps Script
+      mode: "no-cors", // required for Apps Script
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(formData),
+      body: JSON.stringify({
+        ...formData,
+        requestId: Date.now(), // 🔥 ensures every request is unique
+      }),
     });
   } catch (err) {
     console.log("Webhook error:", err);
   }
 
-  // small delay to ensure request is sent
+  // delay to ensure request is sent
   await new Promise((r) => setTimeout(r, 500));
 
   const { fullName, phone, interest, situation, startTime } = formData;
