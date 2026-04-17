@@ -59,26 +59,29 @@ export default function App() {
   const handleSubmit = async (e) => {
   e.preventDefault();
   if (!validate()) return;
+
   setLoading(true);
 
   try {
-    await fetch(WEBHOOK_URL + "?t=" + Date.now(), {
+    const response = await fetch(WEBHOOK_URL, {
       method: "POST",
-      mode: "no-cors", // required for Apps Script
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
         ...formData,
-        requestId: Date.now(), // 🔥 ensures every request is unique
+        requestId: Date.now(), // ensures uniqueness
       }),
     });
+
+    const result = await response.json();
+    console.log("Server response:", result);
+
   } catch (err) {
-    console.log("Webhook error:", err);
+    console.error("Webhook error:", err);
   }
 
-  // delay to ensure request is sent
-  await new Promise((r) => setTimeout(r, 500));
+  await new Promise((r) => setTimeout(r, 300));
 
   const { fullName, phone, interest, situation, startTime } = formData;
 
@@ -86,7 +89,7 @@ export default function App() {
 
   window.location.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
 
-  setTimeout(() => setLoading(false), 1000);
+  setLoading(false);
 };
 
   return (
