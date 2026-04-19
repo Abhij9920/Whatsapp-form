@@ -57,40 +57,44 @@ export default function App() {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  if (!validate()) return;
+    e.preventDefault();
+    if (!validate()) return;
 
-  setLoading(true);
+    setLoading(true);
 
-  try {
-    const response = await fetch(WEBHOOK_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        ...formData,
-        requestId: Date.now(), // ensures uniqueness
-      }),
-    });
+    const { fullName, phone, interest, situation, startTime } = formData;
 
-    const result = await response.json();
-    console.log("Server response:", result);
+    try {
+      // Fire and forget — no-cors means we can't read the response,
+      // but the Apps Script will still receive and process it fully.
+      fetch(WEBHOOK_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: {
+          "Content-Type": "text/plain",
+        },
+        body: JSON.stringify({
+          fullName,
+          phone,
+          interest,
+          situation,
+          startTime,
+          requestId: Date.now(), // ensures every submission is treated as unique
+        }),
+      });
+    } catch (err) {
+      console.error("Webhook error:", err);
+    }
 
-  } catch (err) {
-    console.error("Webhook error:", err);
-  }
+    // Small delay to allow fetch to fire before navigation
+    await new Promise((r) => setTimeout(r, 500));
 
-  await new Promise((r) => setTimeout(r, 300));
+    const message = `Hi, I just filled the form:\n\nName: ${fullName}\nPhone: ${phone}\n\nInterest: ${interest}\nSituation: ${situation}\nStart Time: ${startTime}`;
 
-  const { fullName, phone, interest, situation, startTime } = formData;
+    window.location.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
 
-  const message = `Hi, I just filled the form:\n\nName: ${fullName}\nPhone: ${phone}\n\nInterest: ${interest}\nSituation: ${situation}\nStart Time: ${startTime}`;
-
-  window.location.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
-
-  setLoading(false);
-};
+    setLoading(false);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#f0f7ff] via-[#fafafa] to-[#f0fff4] flex flex-col items-center px-4 pt-10 pb-16 relative overflow-hidden font-sans text-slate-800">
