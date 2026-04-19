@@ -64,30 +64,22 @@ export default function App() {
 
     const { fullName, phone, interest, situation, startTime } = formData;
 
-    try {
-      // Fire and forget — no-cors means we can't read the response,
-      // but the Apps Script will still receive and process it fully.
-      fetch(WEBHOOK_URL, {
-        method: "POST",
-        mode: "no-cors",
-        headers: {
-          "Content-Type": "text/plain",
-        },
-        body: JSON.stringify({
-          fullName,
-          phone,
-          interest,
-          situation,
-          startTime,
-          requestId: Date.now(), // ensures every submission is treated as unique
-        }),
-      });
-    } catch (err) {
-      console.error("Webhook error:", err);
-    }
+    const payload = JSON.stringify({
+      fullName,
+      phone,
+      interest,
+      situation,
+      startTime,
+      requestId: Date.now(),
+    });
 
-    // Small delay to allow fetch to fire before navigation
-    await new Promise((r) => setTimeout(r, 500));
+    // navigator.sendBeacon is specifically designed to survive page navigation.
+    // Unlike fetch, the browser guarantees it completes even after redirect.
+    const blob = new Blob([payload], { type: "text/plain" });
+    navigator.sendBeacon(WEBHOOK_URL, blob);
+
+    // Small delay so beacon is queued before redirect
+    await new Promise((r) => setTimeout(r, 300));
 
     const message = `Hi, I just filled the form:\n\nName: ${fullName}\nPhone: ${phone}\n\nInterest: ${interest}\nSituation: ${situation}\nStart Time: ${startTime}`;
 
