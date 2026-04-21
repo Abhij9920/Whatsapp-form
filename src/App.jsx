@@ -3,6 +3,7 @@ import { useState } from "react";
 const fields = [
   { name: "fullName", label: "First Name – Surname", type: "text", required: true, placeholder: "e.g. Priya Sharma" },
   { name: "phone", label: "Mobile Number", type: "text", required: true, placeholder: "e.g. +61 400 000 000" },
+  { name: "email", label: "Email Address", type: "text", required: true, placeholder: "e.g. priya@example.com" },
   {
     name: "interest",
     label: "What are you most interested in right now?",
@@ -30,12 +31,12 @@ const fields = [
   },
 ];
 
-const WHATSAPP_NUMBER = "919029624129";
+const WHATSAPP_NUMBER = "61466707475";
 const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbywxCLH2MEjdElkXr-LRk-PASKypUbuwEgoNjyGycimTzcL5jbMABZ11l5jPxpVO2xu/exec";
 
 export default function App() {
   const [formData, setFormData] = useState({
-    fullName: "", phone: "", interest: "", situation: "", startTime: "",
+    fullName: "", phone: "", email: "", interest: "", situation: "", startTime: "",
   });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
@@ -62,26 +63,24 @@ export default function App() {
 
     setLoading(true);
 
-    const { fullName, phone, interest, situation, startTime } = formData;
+    const { fullName, phone, email, interest, situation, startTime } = formData;
 
     const payload = JSON.stringify({
       fullName,
       phone,
+      email,
       interest,
       situation,
       startTime,
       requestId: Date.now(),
     });
 
-    // navigator.sendBeacon is specifically designed to survive page navigation.
-    // Unlike fetch, the browser guarantees it completes even after redirect.
     const blob = new Blob([payload], { type: "text/plain" });
     navigator.sendBeacon(WEBHOOK_URL, blob);
 
-    // Small delay so beacon is queued before redirect
     await new Promise((r) => setTimeout(r, 300));
 
-    const message = `Hi, I just filled the form:\n\nName: ${fullName}\nPhone: ${phone}\n\nInterest: ${interest}\nSituation: ${situation}\nStart Time: ${startTime}`;
+    const message = `Hi, I just filled the form:\n\nName: ${fullName}\nPhone: ${phone}\nEmail: ${email}\n\nInterest: ${interest}\nSituation: ${situation}\nStart Time: ${startTime}`;
 
     window.location.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
 
@@ -90,12 +89,10 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#f0f7ff] via-[#fafafa] to-[#f0fff4] flex flex-col items-center px-4 pt-10 pb-16 relative overflow-hidden font-sans text-slate-800">
-      {/* Background decoration */}
       <div className="fixed -top-[100px] -right-[100px] w-[400px] h-[400px] rounded-full bg-[radial-gradient(circle,rgba(34,197,94,0.08)_0%,transparent_70%)] pointer-events-none"></div>
       <div className="fixed -bottom-[100px] -left-[100px] w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,rgba(59,130,246,0.06)_0%,transparent_70%)] pointer-events-none"></div>
 
       <div className="w-full max-w-[440px] animate-fade-up relative z-10">
-        {/* Header */}
         <header className="text-center mb-8">
           <div className="inline-block bg-green-500/10 text-green-600 text-[13px] font-semibold px-3.5 py-1.5 rounded-full mb-4 tracking-wide">
             🎓 Study in Australia
@@ -108,7 +105,6 @@ export default function App() {
           </p>
         </header>
 
-        {/* Card */}
         <div className="bg-white rounded-3xl shadow-[0_4px_6px_rgba(0,0,0,0.04),0_20px_60px_rgba(0,0,0,0.08)] p-8 border border-slate-200/80">
           <form onSubmit={handleSubmit} noValidate>
             {fields.map((field) => (
